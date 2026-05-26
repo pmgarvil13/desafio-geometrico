@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafío Geométrico - 4º Educación Primaria</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- React and ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone for live JSX translation -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 12s linear infinite;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-100 via-sky-50 to-emerald-100 min-h-screen">
+
+  <div id="root"></div>
+
+  <!-- React Code with Babel -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // Custom SVG-based lightweight Icon component replacement for lucide-react in HTML environment
+    const Icons = {
+      Award: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <circle cx="12" cy="8" r="7" />
+          <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
+        </svg>
+      ),
+      CheckCircle2: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      ),
+      XCircle: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="m15 9-6 6" />
+          <path d="m9 9 6 6" />
+        </svg>
+      ),
+      ChevronRight: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      ),
+      ChevronLeft: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      ),
+      RefreshCw: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+          <path d="M16 16h5v5" />
+        </svg>
+      ),
+      Volume2: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+        </svg>
+      ),
+      VolumeX: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+          <line x1="22" x2="16" y1="9" y2="15" />
+          <line x1="16" x2="22" y1="9" y2="15" />
+        </svg>
+      ),
+      Edit3: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+      ),
+      Trash2: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="M3 6h18" />
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+          <line x1="10" x2="10" y1="11" y2="17" />
+          <line x1="14" x2="14" y1="11" y2="17" />
+        </svg>
+      ),
+      Shield: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.8 17 5 19 5a1 1 0 0 1 1 1Z" />
+        </svg>
+      ),
+      Star: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      ),
+      Sparkles: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z" />
+          <path d="m5 3 1 2.5L8.5 6 6 7 5 9.5 4 7 1.5 6 4 5z" />
+        </svg>
+      ),
+      Compass: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <circle cx="12" cy="12" r="10" />
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+        </svg>
+      ),
+      ArrowRight: (props) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+          <line x1="5" x2="19" y1="12" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      )
+    };
+
+    // Synthetic Sound Effects
+    class SoundEffects {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+      playSuccess() {
+        if (this.muted) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(261.63, now); // C4
+        osc1.frequency.setValueAtTime(329.63, now + 0.08); // E4
+        osc1.frequency.setValueAtTime(392.00, now + 0.16); // G4
+        osc1.frequency.setValueAtTime(523.25, now + 0.24); // C5
+        
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(523.25, now + 0.24);
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc1.start(now);
+        osc2.start(now + 0.24);
+        osc1.stop(now + 0.5);
+        osc2.stop(now + 0.5);
+      }
+      playError() {
+        if (this.muted) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(80, now + 0.3);
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+      playClick() {
+        if (this.muted) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(300, now + 0.05);
+        
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.06);
+        
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+      playComplete() {
+        if (this.muted) return;
+        this.init();
+        const now = this.ctx.currentTime;
+        const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+          gain.gain.setValueAtTime(0.1, now + idx * 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.1);
+          osc.stop(now + idx * 0.1 + 0.25);
+        });
+      }
+    }
+
+    const sounds = new SoundEffects();
+
+    // Pizarra Táctil y Ratón
+    const Scratchpad = ({ id, label = "Espacio para operaciones (Dibuja aquí con el dedo o ratón)" }) => {
+      const canvasRef = useRef(null);
+      const [isDrawing, setIsDrawing] = useState(false);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.strokeStyle = '#4B5563';
+          ctx.lineWidth = 3;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+        }
+      }, []);
+
+      const getCoordinates = (e) => {
+        const canvas = canvasRef.current;
+        if (!canvas) return { x: 0, y: 0 };
+        const rect = canvas.getBoundingClientRect();
+        
+        if (e.touches && e.touches.length > 0) {
+          return {
+            x: e.touches[0].clientX - rect.left,
+            y: e.touches[0].clientY - rect.top
+          };
+        }
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      };
+
+      const startDrawing = (e) => {
+        e.preventDefault();
+        setIsDrawing(true);
+        const { x, y } = getCoordinates(e);
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+        }
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const { x, y } = getCoordinates(e);
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        }
+      };
+
+      const stopDrawing = () => {
+        setIsDrawing(false);
+      };
+
+      const clearCanvas = () => {
+        sounds.playClick();
+        const canvas = canvasRef.current;
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      };
+
+      return (
+        <div className="bg-amber-50 border-2 border-dashed border-amber-300 rounded-xl p-3 relative shadow-inner">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
+              <Icons.Edit3 className="w-3 h-3" /> {label}
+            </span>
+            <button 
+              onClick={clearCanvas}
+              className="text-amber-700 hover:text-red-600 p-1 rounded-lg hover:bg-amber-100 transition-colors flex items-center gap-1 text-xs font-semibold"
+              title="Borrar dibujo"
+            >
+              <Icons.Trash2 className="w-3.5 h-3.5" /> Borrar pizarra
+            </button>
+          </div>
+          <canvas
+            ref={canvasRef}
+            width={500}
+            height={150}
+            className="w-full bg-white rounded-lg border border-amber-200 cursor-crosshair touch-none h-32"
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+          />
+        </div>
+      );
+    };
+
+    // Geoplano Virtual Absoluto
+    const Geoplano = ({ type, onVerify, completed }) => {
+      const [points, setPoints] = useState([]);
+      const [lines, setLines] = useState([]);
+      const [feedback, setFeedback] = useState({ show: false, success: false, msg: "" });
+      
+      const gridSize = 5;
+      const spacing = 55;
+      const offset = 40;
+
+      const getCoords = (index) => {
+        const r = Math.floor(index / gridSize);
+        const c = index % gridSize;
+        return { x: offset + c * spacing, y: offset + r * spacing };
+      };
+
+      const handlePointClick = (index) => {
+        if (completed) return;
+        sounds.playClick();
+        
+        const newPoints = [...points];
+        const pointIndex = newPoints.indexOf(index);
+
+        if (pointIndex === -1) {
+          if (newPoints.length > 0) {
+            setLines([...lines, [newPoints[newPoints.length - 1], index]]);
+          }
+          newPoints.push(index);
+        } else if (pointIndex === 0 && newPoints.length > 2) {
+          setLines([...lines, [newPoints[newPoints.length - 1], index]]);
+          newPoints.push(index);
+        } else {
+          newPoints.length = 0;
+          setLines([]);
+        }
+        setPoints(newPoints);
+      };
+
+      const clearGeoplano = () => {
+        sounds.playClick();
+        setPoints([]);
+        setLines([]);
+        setFeedback({ show: false, success: false, msg: "" });
+      };
+
+      const checkDrawing = () => {
+        if (type === 'pentagono') {
+          const uniquePoints = new Set(points);
+          const isClosed = points.length >= 6 && points[0] === points[points.length - 1];
+          if (uniquePoints.size === 5 && isClosed) {
+            setFeedback({ show: true, success: true, msg: "¡Excelente! Has dibujado un polígono cerrado de 5 lados (Pentágono)." });
+            sounds.playSuccess();
+            onVerify(true);
+          } else {
+            setFeedback({ show: true, success: false, msg: "Inténtalo de nuevo. Asegúrate de marcar exactamente 5 vértices diferentes y cerrar la figura volviendo al clavo de inicio." });
+            sounds.playError();
+          }
+        } else if (type === 'cuadrilatero') {
+          const uniquePoints = new Set(points);
+          const isClosed = points.length >= 5 && points[0] === points[points.length - 1];
+          if (uniquePoints.size === 4 && isClosed) {
+            setFeedback({ show: true, success: true, msg: "¡Muy bien! Un cuadrilátero (4 lados) es el único que tiene exactamente 2 diagonales." });
+            sounds.playSuccess();
+            onVerify(true);
+          } else {
+            setFeedback({ show: true, success: false, msg: "Asegúrate de dibujar una figura cerrada de exactamente 4 esquinas." });
+            sounds.playError();
+          }
+        }
+      };
+
+      return (
+        <div className="flex flex-col items-center bg-sky-50 border-2 border-sky-300 rounded-2xl p-4 shadow-md max-w-sm mx-auto">
+          <div className="flex justify-between w-full mb-3">
+            <span className="text-xs font-black text-sky-800 flex items-center gap-1 uppercase tracking-wider">
+              <Icons.Compass className="w-4 h-4 text-sky-600 animate-spin-slow" /> Geoplano de Clavos
+            </span>
+            <button 
+              onClick={clearGeoplano}
+              className="text-xs bg-sky-200 hover:bg-sky-300 text-sky-900 font-extrabold px-2.5 py-1 rounded-lg transition-colors"
+            >
+              Limpiar gomas
+            </button>
+          </div>
+
+          <div className="relative bg-white rounded-xl shadow-inner border border-sky-200 overflow-hidden" style={{ width: '300px', height: '300px' }}>
+            <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
+              {Array.from({ length: gridSize }).map((_, i) => (
+                <line key={`h-${i}`} x1="10" y1={offset + i * spacing} x2="290" y2={offset + i * spacing} stroke="#f1f5f9" strokeWidth="1" />
+              ))}
+              {Array.from({ length: gridSize }).map((_, i) => (
+                <line key={`v-${i}`} x1={offset + i * spacing} y1="10" x2={offset + i * spacing} y2="290" stroke="#f1f5f9" strokeWidth="1" />
+              ))}
+
+              {points.length > 2 && points[0] === points[points.length - 1] && (
+                <polygon 
+                  points={points.map(idx => `${getCoords(idx).x},${getCoords(idx).y}`).join(' ')}
+                  fill="rgba(14, 165, 233, 0.2)"
+                  stroke="rgb(14, 165, 233)"
+                  strokeWidth="4"
+                />
+              )}
+
+              {lines.map((line, idx) => {
+                const p1 = getCoords(line[0]);
+                const p2 = getCoords(line[1]);
+                return (
+                  <line 
+                    key={idx} 
+                    x1={p1.x} y1={p1.y} 
+                    x2={p2.x} y2={p2.y} 
+                    stroke="#0284c7" 
+                    strokeWidth="4" 
+                    strokeLinecap="round" 
+                  />
+                );
+              })}
+            </svg>
+
+            {Array.from({ length: gridSize * gridSize }).map((_, idx) => {
+              const { x, y } = getCoords(idx);
+              const isSelected = points.includes(idx);
+              const isFirst = points[0] === idx;
+              return (
+                <button
+                  key={idx}
+                  onClick={() => handlePointClick(idx)}
+                  className="absolute w-5 h-5 -ml-2.5 -mt-2.5 rounded-full z-10 focus:outline-none flex items-center justify-center transition-all duration-150 active:scale-150"
+                  style={{ 
+                    left: `${x}px`, 
+                    top: `${y}px`,
+                    touchAction: 'none'
+                  }}
+                >
+                  <span className={`w-3.5 h-3.5 rounded-full border shadow-sm transition-transform ${
+                    isSelected 
+                      ? isFirst 
+                        ? 'bg-amber-500 border-amber-600 scale-125 ring-4 ring-amber-200' 
+                        : 'bg-sky-600 border-sky-700 scale-125 ring-4 ring-sky-200' 
+                      : 'bg-slate-300 border-slate-400 hover:bg-slate-500 hover:scale-125'
+                  }`} />
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={checkDrawing}
+            disabled={completed}
+            className={`mt-4 w-full py-2.5 px-4 font-black rounded-xl text-white shadow transition-all transform hover:-translate-y-0.5 ${
+              completed 
+                ? 'bg-emerald-500 cursor-default' 
+                : 'bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-600 hover:to-sky-700'
+            }`}
+          >
+            {completed ? '¡Reto Completado! 👍' : 'Comprobar Forma 🔍'}
+          </button>
+
+          {feedback.show && (
+            <div className={`mt-3 p-2.5 rounded-lg text-xs font-semibold flex items-start gap-2 ${feedback.success ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+              {feedback.success ? <Icons.CheckCircle2 className="w-4 h-4 flex-shrink-0" /> : <Icons.XCircle className="w-4 h-4 flex-shrink-0" />}
+              <span>{feedback.msg}</span>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    function App() {
+      const [studentName, setStudentName] = useState("");
+      const [isPlaying, setIsPlaying] = useState(false);
+      const [currentLevel, setCurrentLevel] = useState(0);
+      const [score, setScore] = useState(0);
+      const [soundMuted, setSoundMuted] = useState(false);
+      const [feedback, setFeedback] = useState({ show: false, success: false, msg: "" });
+      const [completedRetos, setCompletedRetos] = useState({});
+
+      const [reto1Answers, setReto1Answers] = useState({ A: false, B: false, C: false, D: false, E: false });
+      const [reto3Labels, setReto3Labels] = useState({ vértice: "", lado: "", ángulo: "" });
+      const [reto5Answers, setReto5Answers] = useState({ lados: "", vertices: "", angulos: "" });
+      const [reto6Answer, setReto6Answer] = useState("");
+      const [reto7Answer, setReto7Answer] = useState("");
+      const [reto9Answer, setReto9Answer] = useState("");
+      const [reto10Pairs, setReto10Pairs] = useState({ "3 Lados": "", "4 Lados": "", "7 Lados": "", "10 Lados": "" });
+      const [reto11Answer, setReto11Answer] = useState("");
+      const [reto12Answers, setReto12Answers] = useState({ r1: "", r2: "", r3: "", r4: "" });
+      const [reto13Lados, setReto13Lados] = useState("");
+      const [reto15Answer, setReto15Answer] = useState("");
+
+      const totalLevels = 9;
+
+      const toggleMute = () => {
+        sounds.muted = !soundMuted;
+        setSoundMuted(!soundMuted);
+      };
+
+      const startAdventure = (e) => {
+        e.preventDefault();
+        if (studentName.trim().length > 2) {
+          sounds.playClick();
+          setIsPlaying(true);
+          setCurrentLevel(1);
+        }
+      };
+
+      const addScore = (points) => {
+        setScore(prev => prev + points);
+      };
+
+      const nextLevel = () => {
+        sounds.playClick();
+        if (currentLevel < totalLevels - 1) {
+          setCurrentLevel(prev => prev + 1);
+          setFeedback({ show: false, success: false, msg: "" });
+        }
+      };
+
+      const prevLevel = () => {
+        sounds.playClick();
+        if (currentLevel > 1) {
+          setCurrentLevel(prev => prev - 1);
+          setFeedback({ show: false, success: false, msg: "" });
+        }
+      };
+
+      const verifyReto1 = () => {
+        const correct = reto1Answers.A === true && reto1Answers.B === false && reto1Answers.C === true && reto1Answers.D === false && reto1Answers.E === true;
+        if (correct) {
+          setFeedback({ show: true, success: true, msg: "¡Excelente! Has identificado correctamente los polígonos: Figuras A, C y E (líneas cerradas y rectas)." });
+          sounds.playSuccess();
+          addScore(50);
+          setCompletedRetos(prev => ({ ...prev, r1: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "Revisa bien las figuras. Recuerda la regla de oro: un polígono debe ser una línea cerrada y compuesta únicamente por segmentos rectos." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto3 = () => {
+        const v = reto3Labels.vértice.trim().toLowerCase();
+        const l = reto3Labels.lado.trim().toLowerCase();
+        const a = reto3Labels.ángulo.trim().toLowerCase();
+        
+        if (v === "vértice" && l === "lado" && a === "ángulo") {
+          setFeedback({ show: true, success: true, msg: "¡Súper! Has identificado a la perfección las partes del polígono." });
+          sounds.playSuccess();
+          addScore(50);
+          setCompletedRetos(prev => ({ ...prev, r3: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "Revisa las etiquetas. Escribe el nombre correcto en cada recuadro (vértice, lado, ángulo)." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto5And6 = () => {
+        const l = parseInt(reto5Answers.lados);
+        const v = parseInt(reto5Answers.vertices);
+        const a = parseInt(reto5Answers.angulos);
+        const r6 = reto6Answer.trim().toLowerCase();
+
+        const isOctagonCorrect = l === 8 && v === 8 && a === 8;
+        const isDodecagonCorrect = r6 === "dodecágono" || r6 === "dodecagono";
+
+        if (isOctagonCorrect && isDodecagonCorrect) {
+          setFeedback({ show: true, success: true, msg: "¡Increíble! El octógono tiene 8 lados, 8 vértices y 8 ángulos. Y un polígono de 12 lados se llama Dodecágono." });
+          sounds.playSuccess();
+          addScore(100);
+          setCompletedRetos(prev => ({ ...prev, r5: true, r6: true }));
+        } else if (!isOctagonCorrect && isDodecagonCorrect) {
+          setFeedback({ show: true, success: false, msg: "El nombre de 12 lados es correcto, pero revisa la tabla del octógono (pista: ¡todos sus elementos numéricos coinciden!)." });
+          sounds.playError();
+        } else if (isOctagonCorrect && !isDodecagonCorrect) {
+          setFeedback({ show: true, success: false, msg: "La tabla del octógono es correcta. Investiga un poco más el nombre del polígono de 12 lados. ¡Empieza por 'Dode...'!" });
+          sounds.playError();
+        } else {
+          setFeedback({ show: true, success: false, msg: "Vuelve a revisar la tabla y el nombre. ¡Puedes lograrlo!" });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto7 = () => {
+        if (parseInt(reto7Answer) === 12) {
+          setFeedback({ show: true, success: true, msg: "¡Correcto! El perímetro del triángulo es 3 + 4 + 5 = 12 cm. ¡La hormiga ha caminado exactamente eso!" });
+          sounds.playSuccess();
+          addScore(50);
+          setCompletedRetos(prev => ({ ...prev, r7: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "El cálculo no es correcto. Suma las tres longitudes de los lados del triángulo (3 + 4 + 5)." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto9 = () => {
+        if (parseInt(reto9Answer) === 30) {
+          setFeedback({ show: true, success: true, msg: "¡Maravilloso! Un pentágono regular tiene 5 lados de 6 cm cada uno. Perímetro: 5 × 6 = 30 cm." });
+          sounds.playSuccess();
+          addScore(50);
+          setCompletedRetos(prev => ({ ...prev, r9: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "Revisa tu operación. Multiplica el número de lados del pentágono (5) por la longitud de cada lado (6 cm)." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto10 = () => {
+        const correct = 
+          reto10Pairs["3 Lados"] === "triángulo" &&
+          reto10Pairs["4 Lados"] === "cuadrilátero" &&
+          reto10Pairs["7 Lados"] === "heptágono" &&
+          reto10Pairs["10 Lados"] === "decágono";
+
+        if (correct) {
+          setFeedback({ show: true, success: true, msg: "¡Perfecto! Has conquistado el Castillo de los Nombres relacionando cada número de lados con su nombre correcto." });
+          sounds.playSuccess();
+          addScore(80);
+          setCompletedRetos(prev => ({ ...prev, r10: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "Algunos nombres no corresponden. Vuelve a intentarlo relacionándolos con cuidado." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto11 = () => {
+        if (parseInt(reto11Answer) === 30) {
+          setFeedback({ show: true, success: true, msg: "¡Magnífico! El jardín tiene 4 lados: dos de 10 metros y dos de 5 metros. Perímetro: 10 + 10 + 5 + 5 = 30 m." });
+          sounds.playSuccess();
+          addScore(80);
+          setCompletedRetos(prev => ({ ...prev, r11: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "¡Cuidado! Recuerda que un jardín rectangular tiene 4 lados en total. Debes sumar todos sus bordes." });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto12 = () => {
+        const { r1, r2, r3, r4 } = reto12Answers;
+        const isCorrect = 
+          r1.toUpperCase() === "F" &&
+          r2.toUpperCase() === "V" &&
+          r3.toUpperCase() === "V" &&
+          r4.toUpperCase() === "F";
+
+        if (isCorrect) {
+          setFeedback({ show: true, success: true, msg: "¡Genial! Has superado el detector de mentiras. Recuerda que los círculos no tienen lados rectos, por eso no son polígonos." });
+          sounds.playSuccess();
+          addScore(100);
+          setCompletedRetos(prev => ({ ...prev, r12: true }));
+        } else {
+          setFeedback({ show: true, success: false, msg: "Alguna de las respuestas es incorrecta. Piensa bien: ¿cuántas diagonales tiene un triángulo? ¿puede un círculo ser polígono?" });
+          sounds.playError();
+        }
+      };
+
+      const verifyReto13And15 = () => {
+        const isR13Ok = parseInt(reto13Lados) > 2;
+        const isR15Ok = parseInt(reto15Answer) === 24;
+
+        if (isR13Ok && isR15Ok) {
+          setFeedback({ show: true, success: true, msg: "¡Desafío Final Superado! Un dodecágono regular con lados de 2 cm tiene un perímetro de 24 cm (12 × 2)." });
+          sounds.playSuccess();
+          sounds.playComplete();
+          addScore(150);
+          setCompletedRetos(prev => ({ ...prev, r13: true, r15: true }));
+        } else if (isR13Ok && !isR15Ok) {
+          setFeedback({ show: true, success: false, msg: "Has completado la observación en el aula, pero revisa el cálculo del perímetro del dodecágono (12 lados × 2 cm)." });
+          sounds.playError();
+        } else {
+          setFeedback({ show: true, success: false, msg: "Completa ambas respuestas para poder graduarte del desafío geométrico." });
+          sounds.playError();
+        }
+      };
+
+      return (
+        <div className="max-w-4xl mx-auto p-3 sm:p-6">
+          {/* Header Bar */}
+          <header className="bg-white shadow-md rounded-2xl p-4 mb-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-sky-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-gradient-to-tr from-indigo-500 to-sky-400 rounded-xl text-white shadow-md">
+                <Icons.Compass className="w-6 h-6 animate-spin-slow" />
+              </div>
+              <div>
+                <h1 className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-sky-600">
+                  DESAFÍO GEOMÉTRICO 📐
+                </h1>
+                <p className="text-xs font-bold text-indigo-500 tracking-wider uppercase">4º Educación Primaria</p>
+              </div>
+            </div>
+
+            {isPlaying && (
+              <div className="flex items-center gap-4 bg-slate-50 p-2 rounded-xl border border-slate-200 w-full md:w-auto justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-extrabold text-slate-500 uppercase">Explorador/a:</span>
+                  <span className="text-sm font-black text-indigo-700">{studentName}</span>
+                </div>
+                <div className="h-5 w-[1px] bg-slate-200" />
+                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-lg border border-amber-200">
+                  <Icons.Star className="w-4 h-4 text-amber-500 fill-amber-400" />
+                  <span className="font-extrabold text-amber-700">{score} pts</span>
+                </div>
+              </div>
+            )}
+
+            <button 
+              onClick={toggleMute}
+              className="text-slate-500 hover:text-indigo-600 p-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 transition-all flex items-center justify-center"
+              title={soundMuted ? "Activar Sonido" : "Desactivar Sonido"}
+            >
+              {soundMuted ? <Icons.VolumeX className="w-5 h-5" /> : <Icons.Volume2 className="w-5 h-5" />}
+            </button>
+          </header>
+
+          {/* Main Adventure Container */}
+          <main className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden flex flex-col min-h-[550px]">
+            {isPlaying && currentLevel < totalLevels - 1 && (
+              <div className="bg-slate-50 border-b border-slate-100 p-4">
+                <div className="flex justify-between items-center text-xs font-bold text-slate-400 mb-2">
+                  <span>Misión {currentLevel} de {totalLevels - 2}</span>
+                  <span>{Math.round((currentLevel / (totalLevels - 2)) * 100)}% Completado</span>
+                </div>
+                <div className="w-full bg-slate-200 h-3 rounded-full overflow-hidden flex gap-0.5">
+                  {Array.from({ length: totalLevels - 2 }).map((_, idx) => (
+                    <div 
+                      key={idx}
+                      className={`h-full flex-1 transition-all duration-500 ${
+                        idx + 1 < currentLevel 
+                          ? 'bg-emerald-500' 
+                          : idx + 1 === currentLevel 
+                            ? 'bg-indigo-600 animate-pulse' 
+                            : 'bg-slate-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="p-6 md:p-8 flex-grow flex flex-col justify-center animate-fadeIn">
+              
+              {/* LEVEL 0: Welcome Registration */}
+              {!isPlaying && (
+                <div className="max-w-md mx-auto w-full text-center py-6">
+                  <div className="inline-block p-4 bg-sky-50 rounded-full mb-4">
+                    <span className="text-4xl">🎓</span>
+                  </div>
+                  <h2 className="text-2xl font-extrabold text-slate-800 mb-2">¡Bienvenido al Desafío Geométrico!</h2>
+                  <p className="text-slate-500 text-sm mb-6">
+                    Acompaña a tus personajes favoritos de geometría en este juego interactivo para practicar polígonos, lados, vértices, perímetros y mucho más. Especialmente diseñado para alumnos de Almería.
+                  </p>
+                  
+                  <form onSubmit={startAdventure} className="space-y-4 mb-6">
+                    <div className="text-left">
+                      <label className="block text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-1.5 ml-1">
+                        Escribe tu nombre para iniciar la aventura:
+                      </label>
+                      <input 
+                        type="text" 
+                        required
+                        placeholder="Ej. Sofía, Alejandro..." 
+                        value={studentName}
+                        onChange={(e) => setStudentName(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:outline-none font-bold text-lg shadow-inner text-slate-700 transition-colors"
+                      />
+                    </div>
+                    <button 
+                      type="submit"
+                      className="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-sky-500 hover:from-indigo-700 hover:to-sky-600 text-white font-black rounded-xl shadow-lg transform active:scale-95 transition-all text-lg flex items-center justify-center gap-2"
+                    >
+                      ¡Comenzar Desafío! <Icons.ArrowRight className="w-5 h-5" />
+                    </button>
+                  </form>
+
+                  <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 text-left text-xs text-slate-500 space-y-2">
+                    <div className="flex items-center gap-1.5 text-indigo-700 font-extrabold">
+                      <Icons.Shield className="w-4 h-4" />
+                      <span>Créditos y Propiedad Intelectual</span>
+                    </div>
+                    <p>
+                      Esta aplicación interactiva ha sido creada respetando y adaptando íntegramente el material original de <b>Pedro Manuel García Vilar</b>.
+                    </p>
+                    <div className="pt-1.5 border-t border-slate-200 flex flex-wrap gap-x-3 gap-y-1 items-center justify-between text-[11px]">
+                      <span className="font-bold text-slate-600">© Pedro Manuel García Vilar</span>
+                      <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                        <span>CC BY-NC-SA 4.0</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* LEVEL 1: ¿Es o no es un Polígono? */}
+              {isPlaying && currentLevel === 1 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">💡</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">1. ¿Es o no es un Polígono?</h3>
+                      <p className="text-sm text-sky-700">Recuerda: Un polígono es una figura geométrica plana delimitada por una <b>línea cerrada y recta</b>.</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-black text-slate-700 mb-3 flex items-center gap-1.5">
+                      <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold">RETO 1</span>
+                      Selecciona únicamente las figuras que sean polígonos haciendo clic sobre ellas:
+                    </h4>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                      {[
+                        { id: 'A', name: 'Figura A (Hexágono)', svg: (
+                          <polygon points="50,10 90,30 90,70 50,90 10,70 10,30" className="fill-indigo-100 stroke-indigo-600 stroke-2" />
+                        )},
+                        { id: 'B', name: 'Figura B (Curva)', svg: (
+                          <path d="M50,10 C90,10 90,90 50,90 C10,90 10,10 50,10 Z" className="fill-indigo-100 stroke-indigo-600 stroke-2" />
+                        )},
+                        { id: 'C', name: 'Figura C (Triángulo)', svg: (
+                          <polygon points="50,15 90,80 10,80" className="fill-indigo-100 stroke-indigo-600 stroke-2" />
+                        )},
+                        { id: 'D', name: 'Figura D (Abierta)', svg: (
+                          <path d="M10,20 L50,80 L90,20 L95,70" fill="none" className="stroke-indigo-600 stroke-2" />
+                        )},
+                        { id: 'E', name: 'Figura E (Cuadrado)', svg: (
+                          <polygon points="20,20 80,20 80,80 20,80" className="fill-indigo-100 stroke-indigo-600 stroke-2" />
+                        )}
+                      ].map((fig) => (
+                        <button
+                          key={fig.id}
+                          onClick={() => {
+                            sounds.playClick();
+                            setReto1Answers(prev => ({ ...prev, [fig.id]: !prev[fig.id] }));
+                          }}
+                          className={`p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                            reto1Answers[fig.id] 
+                              ? 'border-indigo-600 bg-indigo-50/70 ring-2 ring-indigo-200' 
+                              : 'border-slate-200 hover:border-slate-300 bg-white shadow-sm'
+                          }`}
+                        >
+                          <svg viewBox="0 0 100 100" className="w-16 h-16">
+                            {fig.svg}
+                          </svg>
+                          <span className="text-xs font-bold text-slate-600">{fig.name}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={verifyReto1}
+                      disabled={completedRetos.r1}
+                      className={`mt-4 py-2 px-4 rounded-xl text-sm font-bold text-white shadow transition-all ${
+                        completedRetos.r1 ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'
+                      }`}
+                    >
+                      {completedRetos.r1 ? '¡Reto 1 Superado! ✓' : 'Verificar Reto 1 🔍'}
+                    </button>
+                  </div>
+
+                  <hr className="border-slate-100" />
+
+                  <div>
+                    <h4 className="font-black text-slate-700 mb-3 flex items-center gap-1.5">
+                      <span className="bg-amber-100 text-amber-700 text-xs px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold">RETO 2</span>
+                      ¿Eres capaz de dibujar un Pentágono en el geoplano virtual?
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-4">Haz clic en los clavos para trazar los 5 lados. Recuerda hacer clic de nuevo en el primer clavo para cerrar la figura por completo.</p>
+                    <Geoplano 
+                      type="pentagono" 
+                      completed={completedRetos.r2} 
+                      onVerify={(success) => {
+                        if (success) {
+                          addScore(50);
+                          setCompletedRetos(prev => ({ ...prev, r2: true }));
+                        }
+                      }} 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* LEVEL 2: Elementos de un Polígono */}
+              {isPlaying && currentLevel === 2 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">📐</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">2. Elementos de un Polígono</h3>
+                      <p className="text-sm text-sky-700">Identifica las partes de cualquier polígono: los <b>lados</b>, los <b>vértices</b> (esquinas) y los <b>ángulos</b> (espacio interior entre dos lados).</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-black text-slate-700 mb-4 flex items-center gap-1.5">
+                      <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold">RETO 3</span>
+                      Escribe el nombre correcto de cada elemento señalado (lado, vértice, ángulo):
+                    </h4>
+
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8 bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                      <div className="relative w-64 h-64 bg-white rounded-xl border border-slate-100 shadow-sm flex items-center justify-center">
+                        <svg viewBox="0 0 200 200" className="w-56 h-56">
+                          <polygon points="40,160 100,30 160,160" className="fill-indigo-50 stroke-indigo-600 stroke-4" />
+                          <path d="M 52,136 A 25,25 0 0 0 76,160 L 40,160 Z" className="fill-amber-300 stroke-amber-500 stroke-2" />
+                          <path d="M 100,30 L 130,15" fill="none" className="stroke-slate-400 stroke-2" strokeDasharray="4" />
+                          <path d="M 130,95 L 160,95" fill="none" className="stroke-slate-400 stroke-2" strokeDasharray="4" />
+                          <path d="M 55,145 L 25,120" fill="none" className="stroke-slate-400 stroke-2" strokeDasharray="4" />
+                        </svg>
+
+                        <div className="absolute top-2 right-4">
+                          <input 
+                            type="text" 
+                            placeholder="¿Qué es?" 
+                            value={reto3Labels.vértice}
+                            onChange={(e) => setReto3Labels(prev => ({ ...prev, vértice: e.target.value }))}
+                            className="w-24 px-2 py-1 text-xs font-bold border-2 border-slate-300 rounded-lg text-center focus:border-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="absolute top-24 right-2">
+                          <input 
+                            type="text" 
+                            placeholder="¿Qué es?" 
+                            value={reto3Labels.lado}
+                            onChange={(e) => setReto3Labels(prev => ({ ...prev, lado: e.target.value }))}
+                            className="w-24 px-2 py-1 text-xs font-bold border-2 border-slate-300 rounded-lg text-center focus:border-indigo-500 outline-none"
+                          />
+                        </div>
+                        <div className="absolute bottom-28 left-2">
+                          <input 
+                            type="text" 
+                            placeholder="¿Qué es?" 
+                            value={reto3Labels.ángulo}
+                            onChange={(e) => setReto3Labels(prev => ({ ...prev, ángulo: e.target.value }))}
+                            className="w-24 px-2 py-1 text-xs font-bold border-2 border-slate-300 rounded-lg text-center focus:border-indigo-500 outline-none"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-slate-500 space-y-2 max-w-xs">
+                        <p className="font-bold text-slate-700">Pistas para escribir:</p>
+                        <ul className="list-disc pl-4 space-y-1">
+                          <li><b>vértice</b> (lleva tilde en la e)</li>
+                          <li><b>lado</b></li>
+                          <li><b>ángulo</b> (lleva tilde en la a)</li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={verifyReto3}
+                      disabled={completedRetos.r3}
+                      className={`mt-4 py-2.5 px-5 rounded-xl text-sm font-bold text-white shadow transition-all ${
+                        completedRetos.r3 ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'
+                      }`}
+                    >
+                      {completedRetos.r3 ? '¡Reto 3 Superado! ✓' : 'Comprobar Elementos 🔍'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* LEVEL 3: Las Diagonales */}
+              {isPlaying && currentLevel === 3 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">💫</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">3. Diagonales de un Polígono</h3>
+                      <p className="text-sm text-sky-700">Una diagonal es un segmento de recta que une <b>dos vértices no consecutivos</b> (es decir, que no están pegados por un lado).</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-black text-slate-700 mb-3 flex items-center gap-1.5">
+                      <span className="bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold">RETO 4</span>
+                      Toma gomas elásticas virtuales y dibuja un Cuadrilátero en el geoplano:
+                    </h4>
+                    <p className="text-xs text-slate-500 mb-4">¡Un cuadrilátero tiene 4 lados y siempre contiene exactamente 2 diagonales!</p>
+                    
+                    <Geoplano 
+                      type="cuadrilatero" 
+                      completed={completedRetos.r4} 
+                      onVerify={(success) => {
+                        if (success) {
+                          addScore(60);
+                          setCompletedRetos(prev => ({ ...prev, r4: true }));
+                        }
+                      }} 
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* LEVEL 4: Clasificación según el número de lados */}
+              {isPlaying && currentLevel === 4 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">🏰</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">4. El Reino de los Nombres</h3>
+                      <p className="text-sm text-sky-700">Los polígonos reciben nombres especiales según cuántos lados tengan. ¡Y recuerda! Tienen el mismo número de lados, vértices y ángulos.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                      <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider text-indigo-600 mb-3">RETO 5: El Octógono de STOP</h4>
+                      <p className="text-xs text-slate-600 mb-3">Completa el registro numérico de una señal de STOP (Octógono):</p>
+                      
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
+                          <span className="text-xs font-bold text-slate-600">Número de Lados:</span>
+                          <input 
+                            type="number" 
+                            value={reto5Answers.lados} 
+                            onChange={(e) => setReto5Answers(prev => ({ ...prev, lados: e.target.value }))}
+                            className="w-16 p-1 border rounded text-center text-sm font-bold"
+                          />
+                        </div>
+                        <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
+                          <span className="text-xs font-bold text-slate-600">Número de Vértices:</span>
+                          <input 
+                            type="number" 
+                            value={reto5Answers.vertices} 
+                            onChange={(e) => setReto5Answers(prev => ({ ...prev, vertices: e.target.value }))}
+                            className="w-16 p-1 border rounded text-center text-sm font-bold"
+                          />
+                        </div>
+                        <div className="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200">
+                          <span className="text-xs font-bold text-slate-600">Número de Ángulos:</span>
+                          <input 
+                            type="number" 
+                            value={reto5Answers.angulos} 
+                            onChange={(e) => setReto5Answers(prev => ({ ...prev, angulos: e.target.value }))}
+                            className="w-16 p-1 border rounded text-center text-sm font-bold"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+                      <div>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider text-indigo-600 mb-3">RETO 6: Investigación Misteriosa</h4>
+                        <p className="text-xs text-slate-600 mb-3">¿Cómo se llama el polígono misterioso de la familia que tiene exactamente <b>12 lados</b>?</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border border-slate-200 space-y-2">
+                        <label className="block text-xs font-bold text-slate-500">Escribe el nombre aquí:</label>
+                        <input 
+                          type="text" 
+                          placeholder="Ej: Pentágono..."
+                          value={reto6Answer}
+                          onChange={(e) => setReto6Answer(e.target.value)}
+                          className="w-full p-2 border-2 rounded-lg text-sm font-bold focus:border-indigo-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={verifyReto5And6}
+                    disabled={completedRetos.r5}
+                    className={`w-full py-3 rounded-xl font-bold text-white shadow text-sm transition-all ${
+                      completedRetos.r5 ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'
+                    }`}
+                  >
+                    {completedRetos.r5 ? '¡Retos 5 y 6 Superados! ✓' : 'Validar Respuestas del Reino 🔍'}
+                  </button>
+                </div>
+              )}
+
+              {/* LEVEL 5: Concepto de Perímetro */}
+              {isPlaying && currentLevel === 5 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">🐜</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">5. ¿Qué es el Perímetro?</h3>
+                      <p className="text-sm text-sky-700">El perímetro es la <b>suma de la longitud de todos los lados</b> de una figura. Imagina que eres una hormiga dando una vuelta completa por su borde.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-amber-50/60 p-4 rounded-xl border border-amber-200 flex flex-col justify-between">
+                      <div>
+                        <span className="bg-amber-200 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">RETO 7</span>
+                        <h4 className="font-bold text-slate-700 text-sm mt-1.5 mb-2">El Camino de la Hormiga</h4>
+                        <p className="text-xs text-slate-600 mb-4">Un triángulo tiene lados que miden <b>3 cm, 4 cm y 5 cm</b>. ¿Cuánto mide su perímetro total?</p>
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200 w-full max-w-xs mx-auto mb-2">
+                          <input 
+                            type="number" 
+                            placeholder="Resultado"
+                            value={reto7Answer}
+                            onChange={(e) => setReto7Answer(e.target.value)}
+                            className="w-full p-1.5 text-center font-bold text-sm border-none focus:outline-none"
+                          />
+                          <span className="text-xs font-bold text-slate-500 pr-2">cm</span>
+                        </div>
+                        <button 
+                          onClick={verifyReto7}
+                          disabled={completedRetos.r7}
+                          className={`w-full py-1.5 rounded-lg text-xs font-bold text-white ${completedRetos.r7 ? 'bg-emerald-500' : 'bg-amber-600 hover:bg-amber-700'}`}
+                        >
+                          {completedRetos.r7 ? '¡Correcto! ✓' : 'Calcular Perímetro 📐'}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-sky-50/70 p-4 rounded-xl border border-sky-200 flex flex-col justify-between">
+                      <div>
+                        <span className="bg-sky-200 text-sky-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">RETO 8</span>
+                        <h4 className="font-bold text-slate-700 text-sm mt-1.5 mb-2">El Pentágono Regular</h4>
+                        <p className="text-xs text-slate-600 mb-4">Un pentágono regular tiene sus <b>5 lados exactamente iguales</b>. Si cada lado mide 6 cm, ¿cuál es su perímetro?</p>
+                      </div>
+                      
+                      <div>
+                        <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-sky-200 w-full max-w-xs mx-auto mb-2">
+                          <input 
+                            type="number" 
+                            placeholder="Resultado"
+                            value={reto9Answer}
+                            onChange={(e) => setReto9Answer(e.target.value)}
+                            className="w-full p-1.5 text-center font-bold text-sm border-none focus:outline-none"
+                          />
+                          <span className="text-xs font-bold text-slate-500 pr-2">cm</span>
+                        </div>
+                        <button 
+                          onClick={verifyReto9}
+                          disabled={completedRetos.r9}
+                          className={`w-full py-1.5 rounded-lg text-xs font-bold text-white ${completedRetos.r9 ? 'bg-emerald-500' : 'bg-sky-600 hover:bg-sky-700'}`}
+                        >
+                          {completedRetos.r9 ? '¡Correcto! ✓' : 'Multiplicar Lados 📐'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Scratchpad id="perimetro-scratchpad" label="Pizarra de Operaciones: ¡Haz tus sumas o multiplicaciones aquí!" />
+                </div>
+              )}
+
+              {/* LEVEL 6: El Laberinto de los Polígonos */}
+              {isPlaying && currentLevel === 6 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">🧩</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">6. El Laberinto Geométrico</h3>
+                      <p className="text-sm text-sky-700">Demuestra que eres un maestro de las formas asociando los nombres y resolviendo un problema de la vida real.</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 className="font-black text-slate-700 text-xs uppercase tracking-wider text-indigo-600 mb-3">RETO 9: Emparejar Formas</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {["3 Lados", "4 Lados", "7 Lados", "10 Lados"].map((ladosKey) => (
+                        <div key={ladosKey} className="bg-white p-3 rounded-xl border border-slate-200 text-center space-y-2 shadow-sm">
+                          <span className="text-xs font-extrabold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full block">{ladosKey}</span>
+                          <select 
+                            value={reto10Pairs[ladosKey]}
+                            onChange={(e) => setReto10Pairs(prev => ({ ...prev, [ladosKey]: e.target.value }))}
+                            className="w-full text-xs font-bold p-1.5 border rounded-lg focus:border-indigo-500 outline-none bg-slate-50 text-slate-700"
+                          >
+                            <option value="">¿Nombre?</option>
+                            <option value="triángulo">Triángulo</option>
+                            <option value="cuadrilátero">Cuadrilátero</option>
+                            <option value="heptágono">Heptágono</option>
+                            <option value="decágono">Decágono</option>
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={verifyReto10}
+                      disabled={completedRetos.r10}
+                      className={`mt-3 py-1.5 px-4 rounded-lg text-xs font-black text-white shadow ${completedRetos.r10 ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'}`}
+                    >
+                      {completedRetos.r10 ? '¡Emparejamiento Correcto! ✓' : 'Verificar Combinaciones 🔍'}
+                    </button>
+                  </div>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 className="font-black text-slate-700 text-xs uppercase tracking-wider text-indigo-600 mb-2">RETO 10: El Diseñador de Jardines</h4>
+                    <p className="text-xs text-slate-600 mb-3">Queremos rodear con una valla un jardín rectangular. Sus dos lados largos miden <b>10 metros</b> cada uno, y sus dos lados cortos miden <b>5 metros</b> cada uno. ¿Cuántos metros de valla necesitamos en total?</p>
+                    
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 w-full max-w-xs">
+                        <input 
+                          type="number" 
+                          placeholder="Metros totales de valla..."
+                          value={reto11Answer}
+                          onChange={(e) => setReto11Answer(e.target.value)}
+                          className="w-full p-1 text-sm font-bold border-none text-center focus:outline-none"
+                        />
+                        <span className="text-xs font-bold text-slate-400 pr-2">metros</span>
+                      </div>
+                      <button
+                        onClick={verifyReto11}
+                        disabled={completedRetos.r11}
+                        className={`w-full sm:w-auto py-2.5 px-5 rounded-lg text-xs font-black text-white shadow ${completedRetos.r11 ? 'bg-emerald-500' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                      >
+                        {completedRetos.r11 ? '¡Jardín Vallado! ✓' : 'Construir Valla 🛠️'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* LEVEL 7: El Detector de Mentiras */}
+              {isPlaying && currentLevel === 7 && (
+                <div className="space-y-6">
+                  <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
+                    <div className="text-2xl">🕵️‍♂️</div>
+                    <div>
+                      <h3 className="font-extrabold text-sky-800">7. El Detector de Mentiras Geométrico</h3>
+                      <p className="text-sm text-sky-700">Analiza detenidamente cada frase matemática y escribe una <b>V</b> si es Verdadera o una <b>F</b> si es Falsa. ¡No dejes que te engañen!</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    {[
+                      { id: 'r1', text: "Un triángulo tiene 3 vértices y puede tener hasta 2 diagonales en su interior." },
+                      { id: 'r2', text: "Para saber el perímetro de cualquier polígono, basta con sumar la longitud de todos sus lados." },
+                      { id: 'r3', text: "Un hexágono es un polígono compuesto por exactamente 6 lados rectos." },
+                      { id: 'r4', text: "El círculo es el polígono perfecto porque no tiene esquinas ásperas." }
+                    ].map((item, idx) => (
+                      <div key={item.id} className="bg-white p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-4 shadow-sm">
+                        <p className="text-xs font-bold text-slate-600 flex-grow"><span className="text-indigo-600 mr-1">{idx+1}.</span> {item.text}</p>
+                        <input 
+                          type="text" 
+                          maxLength={1}
+                          placeholder="V / F"
+                          value={reto12Answers[item.id]}
+                          onChange={(e) => setReto12Answers(prev => ({ ...prev, [item.id]: e.target.value }))}
+                          className="w-12 p-1.5 border-2 rounded-md text-center text-xs font-black uppercase focus:border-indigo-500 outline-none"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={verifyReto12}
+                    disabled={completedRetos.r12}
+                    className={`w-full py-3 rounded-xl text-sm font-black text-white shadow transition-all ${
+                      completedRetos.r12 ? 'bg-emerald-500' : 'bg-indigo-600 hover:bg-indigo-700'
+                    }`}
+                  >
+                    {completedRetos.r12 ? '¡Detector Completado! ✓' : 'Encender Detector de Verdades 🚨'}
+                  </button>
+                </div>
+              )}
+
+              {/* LEVEL 8: Gran Desafío Final en el Aula */}
+              {isPlaying && currentLevel === 8 && (
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-4 text-white flex gap-3 shadow-md">
+                    <div className="text-2xl animate-pulse">👑</div>
+                    <div>
+                      <h3 className="font-black text-base">8. El Examen de Graduación del Explorador</h3>
+                      <p className="text-xs opacity-90">Completa esta doble misión final combinando la observación en tu aula real y el cálculo matemático definitivo.</p>
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+                      <div>
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">RETO 11 & 12</span>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider text-slate-800 mt-2 mb-1">Inspector del Aula</h4>
+                        <p className="text-xs text-slate-600 mb-3">Mira a tu alrededor en tu clase (o habitación) y localiza un objeto real que sea un polígono (ej. la pizarra, una mesa, un folio). ¿Cuántos lados tiene ese objeto?</p>
+                      </div>
+                      <input 
+                        type="number" 
+                        placeholder="Número de lados..."
+                        value={reto13Lados}
+                        onChange={(e) => setReto13Lados(e.target.value)}
+                        className="w-full p-2 border rounded-lg text-xs font-bold text-center bg-white"
+                      />
+                    </div>
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+                      <div>
+                        <span className="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">RETO 13</span>
+                        <h4 className="font-bold text-slate-700 text-xs uppercase tracking-wider text-slate-800 mt-2 mb-1">El Dodecágono Regular</h4>
+                        <p className="text-xs text-slate-600 mb-3">Calcula el perímetro total de un polígono <b>dodecágono regular</b> sabiendo que cada uno de sus lados mide exactamente <b>2 cm</b>.</p>
+                      </div>
+                      <div className="flex items-center gap-2 bg-white p-1.5 border rounded-lg">
+                        <input 
+                          type="number" 
+                          placeholder="Perímetro final..."
+                          value={reto15Answer}
+                          onChange={(e) => setReto15Answer(e.target.value)}
+                          className="w-full text-center font-bold text-xs border-none focus:outline-none"
+                        />
+                        <span className="text-xs font-black text-slate-400 pr-2">cm</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={verifyReto13And15}
+                    disabled={completedRetos.r13 && completedRetos.r15}
+                    className={`w-full py-3.5 rounded-xl font-black text-white text-base shadow transform active:scale-95 transition-all ${
+                      completedRetos.r13 && completedRetos.r15 
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500' 
+                        : 'bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700'
+                    }`}
+                  >
+                    {completedRetos.r13 && completedRetos.r15 ? '¡Felicidades, Desafío Completado al 100%! 🎉' : 'Entregar Respuestas Finales 🎓'}
+                  </button>
+                </div>
+              )}
+
+              {/* LEVEL 9: Final Congratulations & Diploma Display */}
+              {isPlaying && currentLevel === totalLevels - 1 && (
+                <div className="text-center py-6 max-w-lg mx-auto space-y-6">
+                  <div className="relative inline-block">
+                    <span className="text-6xl animate-pulse block">🏆</span>
+                    <Icons.Sparkles className="w-8 h-8 text-amber-400 absolute -top-2 -right-2 animate-bounce" />
+                  </div>
+
+                  <div>
+                    <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-700 to-emerald-600">
+                      ¡ENHORABUENA, {studentName.toUpperCase()}!
+                    </h2>
+                    <p className="text-slate-500 text-sm mt-1">Has demostrado ser un auténtico experto en la geometría de los polígonos.</p>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-amber-50 to-orange-50 border-4 border-amber-400 rounded-2xl p-6 shadow-md text-left relative overflow-hidden">
+                    <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-amber-300 rounded-full opacity-20" />
+                    
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="text-[10px] font-black text-amber-700 uppercase tracking-widest">DIPLOMA GEOMÉTRICO</div>
+                      <Icons.Award className="w-8 h-8 text-amber-500" />
+                    </div>
+
+                    <p className="text-xs text-slate-600">Se otorga con orgullo a:</p>
+                    <h3 className="text-xl font-black text-slate-800 border-b-2 border-dashed border-slate-300 py-1 my-1">{studentName}</h3>
+                    
+                    <p className="text-xs text-slate-600 mt-3">
+                      Por haber superado satisfactoriamente las misiones y retos interactivos sobre polígonos, cálculo de perímetros, diagonales y elementos en el nivel de <b>4º de Educación Primaria</b>.
+                    </p>
+
+                    <div className="mt-6 flex justify-between items-center pt-2 border-t border-amber-200 text-[10px] font-bold text-slate-500">
+                      <span>Puntuación: {score} puntos</span>
+                      <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Aprobado con Excelencia</span>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      sounds.playClick();
+                      setIsPlaying(false);
+                      setCurrentLevel(0);
+                      setScore(0);
+                      setStudentName("");
+                      setCompletedRetos({});
+                      setReto1Answers({ A: false, B: false, C: false, D: false, E: false });
+                      setReto3Labels({ vértice: "", lado: "", ángulo: "" });
+                      setReto5Answers({ lados: "", vertices: "", angulos: "" });
+                      setReto6Answer("");
+                      setReto7Answer("");
+                      setReto9Answer("");
+                      setReto10Pairs({ "3 Lados": "", "4 Lados": "", "7 Lados": "", "10 Lados": "" });
+                      setReto11Answer("");
+                      setReto12Answers({ r1: "", r2: "", r3: "", r4: "" });
+                      setReto13Lados("");
+                      setReto15Answer("");
+                    }}
+                    className="inline-flex items-center gap-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition-colors"
+                  >
+                    <Icons.RefreshCw className="w-3.5 h-3.5" /> Jugar de nuevo / Cambiar de Alumno
+                  </button>
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer Navigation Bar */}
+            {isPlaying && currentLevel < totalLevels - 1 && (
+              <footer className="bg-slate-50 border-t border-slate-100 p-4 flex justify-between items-center gap-4">
+                <button
+                  onClick={prevLevel}
+                  disabled={currentLevel === 1}
+                  className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border transition-all ${
+                    currentLevel === 1 
+                      ? 'opacity-40 bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed' 
+                      : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200 shadow-sm active:scale-95'
+                  }`}
+                >
+                  <Icons.ChevronLeft className="w-4 h-4" /> Anterior
+                </button>
+
+                <button
+                  onClick={nextLevel}
+                  className="flex items-center gap-1.5 text-xs font-black bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-2 rounded-xl shadow-md transition-all active:scale-95"
+                >
+                  {currentLevel === totalLevels - 2 ? 'Finalizar Desafío' : 'Siguiente'} <Icons.ChevronRight className="w-4 h-4" />
+                </button>
+              </footer>
+            )}
+          </main>
+
+          {/* Global Feedback Banner */}
+          {feedback.show && (
+            <div className={`mt-4 w-full max-w-4xl p-3.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2.5 animate-fadeIn ${
+              feedback.success ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' : 'bg-rose-50 border border-rose-200 text-rose-800'
+            }`}>
+              {feedback.success ? <Icons.CheckCircle2 className="w-4 h-4 flex-shrink-0 text-emerald-600" /> : <Icons.XCircle className="w-4 h-4 flex-shrink-0 text-rose-600" />}
+              <p>{feedback.msg}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Mount React App
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
